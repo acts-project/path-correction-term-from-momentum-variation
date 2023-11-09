@@ -1,13 +1,7 @@
 %% Only use basic LaTeX markup here, it gets rendered by MathJax.
 
-This is a whitepaper example. It contains a number of example
-patterns, layouts etc.
-Simple math like $a + b = c$ or even $\sqrt{s} = 14$ TeV is supported!
+In the track extension model of ACTS, the covariance of a track is updated for every surface intersection by applying a jacobian matrix, the composition of the coordinate transformation and free space transport. In the derivation of the transport jacobian, it is necessary to consider the path difference coming from the track displacement, which appears as a direction variation term with respect to the path length. 
 
-Quisque ullamcorper placerat ipsum. Cras nibh. Morbi vel justo vitae lacus
-tincidunt ultrices. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. In hac
-habitasse platea dictumst. Integer tempus convallis augue. Etiam facilisis. Nunc
-elementum fermentum wisi. Aenean placerat. Ut imperdiet, enim sed gravida
-sollicitudin, felis odio placerat quam, ac pulvinar elit purus eget enim. Nunc vitae
-tortor. Proin tempus nibh sit amet nisl. Vivamus quis tortor vitae risus porta
-vehicula.
+
+The motivation of this white paper is that the author failed in finding any reference explaining this clearly. (Please let the author know if anyone finds it) There are bunch of references which calculate this term with an ideal helix model, but it is not very useful with the runge-kutta based track extension model. Therefore, in this note, we are deriving the term thoroughly and demonstrate how it is implemented in the source code. 
+

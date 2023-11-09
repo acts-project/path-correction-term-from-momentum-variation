@@ -16,72 +16,144 @@
 
 \tableofcontents
 
-\section{Introduction}
-
-We closely follow the description in \cite{adams1995}.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.7\textwidth]{example-image-a}
-    \caption{This is a caption for a figure!}
-    \label{fig:example_a}
-\end{figure}
-
-\lipsum[1] 
-
-As discussed in \autoref{fig:example_a}, the results are very promising.
-
-\section{Method}
-
-\begin{figure}[ht]
-    \begin{subfigure}{0.5\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{example-image-a}
-        \caption{This is a caption for a figure!}
-        \label{fig:sub:example_a}
-    \end{subfigure}
-    \begin{subfigure}{0.5\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{example-image-b}
-        \caption{This is a caption for a figure!}
-        \label{fig:sub:example_b}
-    \end{subfigure}
-
-    \caption{This is a combined caption, \subref{fig:sub:example_a} shows one
-    thing, \subref{fig:sub:example_b} shows another thing}
-    \label{fig:sub}
-\end{figure}
-
-\lipsum[1] 
-
-See \autoref{fig:sub} for an example of a combined figure.
-
-\lipsum[1] 
-
+\section{Mathematical derivation}
+In track reconstruction, the exact transport of covariance matrix during the track extrapolation is important as it can largely affect the results of fitting algorithms. ACTS updates the covariance ($\mathbb{C}$) for every surface intersection by numerically integrating a jacobian ($\mathbb{J}$):
 \begin{equation}
-    a^2 + b^2 = c^2
-    \label{eq:pythagoras}
+\mathbb{C}' = \mathbb{J} \times \mathbb{C} \times \mathbb{J}^T.
+\end{equation}
+The jacobian is the composition of sub-jacobians for coordinate transformation and free space transport. The free transport jacobian matrix is in $8 \times 8$ dimension each of which is from position vector ($\mathbf{r}$), time, unit direction ($\mathbf{t}$) vector and a charge divided by momentum ($\psi$). Its representation can be found from the variation of each parameter, where the variations of time and $\psi$ parameters can be ignored:
+
+\begin{equation}\label{eq:dr}
+d\mathbf{r} = 
+    \frac{\partial \mathbf{r}}{\partial \mathbf{r_0}} \cdot d\mathbf{r_0} +
+    \frac{\partial \mathbf{r}}{\partial \mathbf{t_0}} \cdot d\mathbf{t_0} + 
+    \frac{\partial \mathbf{r}}{\partial \psi_0} \cdot d\psi_0 +
+    \frac{\partial \mathbf{r}}{\partial s} \cdot ds,
 \end{equation}
 
-The business with the triangles, our boy Pythagoras has already figured out, according to \autoref{eq:pythagoras}.
+\begin{equation}
+    d\mathbf{t} = 
+    \frac{\partial \mathbf{t}}{\partial \mathbf{r_0}} \cdot d\mathbf{r_0} +
+    \frac{\partial \mathbf{t}}{\partial \mathbf{t_0}} \cdot d\mathbf{t_0} + 
+    \frac{\partial \mathbf{t}}{\partial \psi_0} \cdot d\psi_0 +
+    \frac{\partial \mathbf{t}}{\partial s} \cdot ds,
+\end{equation}
+where $(\mathbf{r}_0, \mathbf{t}_0, \psi_0)$ and $(\mathbf{r}, \mathbf{t}, \psi)$ represent the parameters at the departure and destination surface, respectively. The last terms in each equation is caused by the path length variation due to the change in track parameters at the departure surface. (For a graphical insight, see the Fig 4.6 of Ref. \cite{tracking_book})
 
-\section{Conclusion}
+Our purpose is expressing the last terms as a function of the other terms to obtain the full transport jacobian. First, let us note that there is an orthogonality between surface normal vector $(\mathbf{w})$ and position variation:
+ 
+\begin{equation}
+    \mathbf{w} \cdot d\mathbf{r} = 0.
+\end{equation}
 
-\lipsum[1] 
+Then, we can obtain $ds$ by using $\frac{\partial \mathbf{r}}{\partial s} ds = \mathbf{t}$ ds:
 
-\appendix
+\begin{equation}
+  ds = - \frac{1}{\mathbf{w} \cdot \mathbf{t}} \mathbf{w} \cdot 
+  \left(  
+  \frac{\partial \mathbf{r}}{\partial \mathbf{r_0}} \cdot d \mathbf{r_0} +  
+  \frac{\partial \mathbf{r}}{\partial \mathbf{t_0}} \cdot d \mathbf{t_0} + 
+  \frac{\partial \mathbf{r}}{\partial \psi_0} \cdot d \psi_0 
+  \right).
+\end{equation}
 
-\section{Auxiliary material}
-\subsection{First subsection}
+This can be directly put into the eq. (\ref{eq:dr}):
 
-\lipsum[1] 
+\begin{equation}\label{eq:dr_final}
+    d\mathbf{r} = 
+    \left( 
+    \mathbf{I} + \mathbf{M}_r 
+    \right)   
+     \left(  
+    \frac{\partial \mathbf{r}}{\partial \mathbf{r_0}} \cdot d \mathbf{r_0} +  
+    \frac{\partial \mathbf{r}}{\partial \mathbf{t_0}} \cdot d \mathbf{t_0} + 
+    \frac{\partial \mathbf{r}}{\partial \psi_0} \cdot d \psi_0 
+    \right),
+\end{equation}
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.7\textwidth]{example-image-a}
-    \caption{This is a caption for a figure!}
-    \label{fig:appendix_example_a}
-\end{figure}
+where
+
+\begin{equation}
+    \mathbf{M}_r = - \frac{1}{\mathbf{w} \cdot \mathbf{t}} \mathbf{t} \mathbf{w}^T.
+\end{equation}
+
+
+We can follow the same step for $d\mathbf{t}$.  $\frac{\partial \mathbf{t}}{\partial s}$ is represented as the following:
+
+\begin{equation}
+ \frac{\partial \mathbf{t}}{\partial s} \cdot ds = \alpha K \mathbf{n} \cdot ds,
+\end{equation}
+
+where $ \alpha = \frac { | \mathbf{b} \times \mathbf {t} | } { { |\mathbf{b}| } } $, $ K = - \psi |\mathbf{b}| $ and $ \mathbf{n} = \frac {  \mathbf{b} \times \mathbf {t}  } { { |  \mathbf{b} \times \mathbf {t} | } } $ (again where $\mathbf{b}$ is the magnetic field at the destination surface.). Now it is trivial to show the following:
+
+\begin{equation}\label{eq:dt_final}
+    d \mathbf{t} = 
+    \left( 
+    \frac{\partial \mathbf{t}}{\partial \mathbf{r_0}}  + \mathbf{M}_t  \frac{\partial \mathbf{r}}{\partial \mathbf{r}_0}
+    \right) d\mathbf{r_0} +
+    \left( 
+    \frac{\partial \mathbf{t}}{\partial \mathbf{t_0}} + \mathbf{M}_t \frac{\partial \mathbf{r}}{\partial \mathbf{t}_0}
+    \right) d\mathbf{t_0} +
+    \left( 
+    \frac{\partial \mathbf{t}}{\partial \mathbf{\psi_0}} + \mathbf{M}_t \frac{\partial \mathbf{r}}{\partial \psi_0}
+    \right) d\mathbf{\psi_0},
+\end{equation}
+
+where
+
+\begin{equation}
+ \mathbf{M}_t = -\frac{\psi}{\mathbf{w} \cdot \mathbf{t}} ( \mathbf{t} \times \mathbf{b}) \mathbf{w}^T .
+\end{equation}
+
+Eq. (\ref{eq:dr_final}) and (\ref{eq:dt_final}) lead to the final form of the full transport jacobian ($\mathbb{J}_{\textrm{transport}}$) as the multiplication of two matrices (Please note that the time dimension will be fully ignored after this point, thus the transport jacobian matrix will be in $7 \times 7$ dimension):
+
+\begin{equation}\label{eq:jacobi}
+    \mathbb{J}_{\textrm{transport}} = 
+    \begin{pmatrix}
+     \mathbf{I} + \mathbf{M}_r & 0 & 0 \\
+     \mathbf{M}_t & \mathbf{I} & 0 \\
+     0 & 0 & 1
+    \end{pmatrix} \times
+    \begin{pmatrix}
+     \frac{\partial{\mathbf{r}}}{\partial{\mathbf{r_0}}} & \frac{\partial{\mathbf{r}}}{\partial{\mathbf{t_0}}} & \frac{\partial{\mathbf{r}}}{\partial{\mathbf{\psi_0}}} \\
+     \frac{\partial{\mathbf{t}}}{\partial{\mathbf{r_0}}} & \frac{\partial{\mathbf{t}}}{\partial{\mathbf{t_0}}} & \frac{\partial{\mathbf{t}}}{\partial{\mathbf{\psi_0}}} \\
+     0 & 0 & 1
+    \end{pmatrix}    ,
+\end{equation}
+
+The first term of is the correction term and the second one is a transport jacobian calculated by Runge-Kutta integration.
+
+\section{Implementation in ACTS}
+
+The correction term of eq. (\ref{eq:jacobi}) can be rewritten as the following:
+\begin{equation}\label{eq:correction_term}
+    \begin{pmatrix}
+     \mathbf{I} + \mathbf{M}_r & 0 & 0 \\
+     \mathbf{M}_t & \mathbf{I} & 0 \\
+     0 & 0 & 1
+    \end{pmatrix} = 
+    \mathbb{I} +
+    \begin{pmatrix}
+     t_x \\
+     t_y \\
+     t_z \\
+     k_x \\
+     k_y \\
+     k_z \\
+     0
+    \end{pmatrix} \times
+    \begin{pmatrix}
+       w'_x & w'_y & w'_z & 0 & 0 & 0 & 0
+    \end{pmatrix},
+\end{equation}
+where 
+\begin{eqnarray}
+  \mathbf{t} & = & (t_x ,t_y, t_z),  \\
+  - \frac{\mathbf{w}}{\mathbf{w} \cdot \mathbf{t}} & = & (w'_x ,w'_y, w'_z), \label{eq:normal}  \\
+  \psi(\mathbf{t} \times \mathbf{b}) & = & (k_x, k_y, k_z). \label{eq:kvec}
+\end{eqnarray}
+
+The implementation of eq. (\ref{eq:correction_term}) can be found in \verb|boundToBoundTransportJacobian| function of \verb|JacobianEngine.cpp|. Eq. (\ref{eq:normal}) can be calculated from surface classes with a track parameter input. Eq. (\ref{eq:kvec}) is the normalized equation of motion that can be retrieved from the runge-kutta stepper formalism. ACTS takes the normalized vector defined at the end of the last step of the 4th order runge-kutta stepper.
 
 \printbibliography{}
 
